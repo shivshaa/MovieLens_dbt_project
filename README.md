@@ -477,8 +477,8 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👤 Author
 
 **Shivsharan Patil**
-- GitHub: [@yourusername](https://github.com/shivshaa)
-- LinkedIn: [Shivsharan_Patil]([https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/shivsharan-patil-6435a1181/))
+- GitHub: [@ShivsharanPatil](!https://github.com/shivshaa)
+- LinkedIn: [Shivsharan_Patil]([!https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/shivsharan-patil-6435a1181/))
 
 ## 🙏 Acknowledgments
 
