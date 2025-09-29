@@ -476,13 +476,14 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 👤 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+**Shivsharan Patil**
+- GitHub: [@yourusername](https://github.com/shivshaa)
+- LinkedIn: [Shivsharan_Patil]([https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/shivsharan-patil-6435a1181/))
 
 ## 🙏 Acknowledgments
 
 - MovieLens dataset by GroupLens Research
+- AWS S3 Datalake storage for raw data
 - DBT Labs for the amazing transformation tool
 - Snowflake for cloud data warehouse platform
 
