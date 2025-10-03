@@ -8,8 +8,8 @@
 
 
 ## 🏗️ Architecture
-
-[!Diagram](diagram.png)  
+ 
+![Diagram](diagram.png){ width=600 height=400 }
 
 ## 📂 Project Structure
 
