@@ -6,18 +6,11 @@
 [![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)](https://www.snowflake.com/)
 [![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
 
-## 📋 Project Overview
-
-A comprehensive data analytics pipeline simulating Netflix data analysis using modern data engineering tools. This project demonstrates the **ELT (Extract, Load, Transform)** paradigm, leveraging AWS S3 for storage, Snowflake as the data warehouse, and DBT for transformation logic.
 
 ## 🏗️ Architecture
 
-```
-┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
-│   Raw Data  │ ───> │   AWS S3     │ ───> │  Snowflake  │ ───> │ DBT Models   │
-│  (CSV Files)│      │   (Storage)  │      │  (RAW Layer)│      │ (Transformed)│
-└─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘
-```
+[!Diagram](diagram.png)  
+
 ## 📂 Project Structure
 
 ```
