@@ -18,7 +18,36 @@ A comprehensive data analytics pipeline simulating Netflix data analysis using m
 │  (CSV Files)│      │   (Storage)  │      │  (RAW Layer)│      │ (Transformed)│
 └─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘
 ```
+## 📂 Project Structure
 
+```
+.
+├── analyses/
+│   └── movie_analysis.sql
+├── macros/
+│   └── custom_macros.sql
+├── models/
+│   ├── staging/
+│   │   ├── src_movies.sql
+│   │   ├── src_ratings.sql
+│   │   └── ...
+│   ├── dimensions/
+│   │   ├── dim_movies.sql
+│   │   ├── dim_users.sql
+│   │   └── dim_genome_tags.sql
+│   └── facts/
+│       ├── fct_ratings.sql
+│       └── fct_genome_scores.sql
+├── seeds/
+│   └── seed_movie_release_dates.csv
+├── snapshots/
+│   └── snap_tags.sql
+├── tests/
+│   └── relevance_score_test.sql
+├── dbt_project.yml
+├── packages.yml
+└── README.md
+```
 ### Tech Stack
 
 - **Storage**: AWS S3
@@ -109,22 +138,6 @@ pip install dbt-snowflake
 
 # Initialize project
 dbt init my_dbt_project
-```
-
-**Project Structure:**
-```
-my_dbt_project/
-├── analyses/          # Ad-hoc analytical queries
-├── macros/            # Reusable SQL functions
-├── models/            # Transformation models
-│   ├── staging/       # Source staging models
-│   ├── dimensions/    # Dimension tables
-│   └── facts/         # Fact tables
-├── seeds/             # Static reference data
-├── snapshots/         # SCD Type 2 tracking
-├── tests/             # Custom data tests
-├── dbt_project.yml    # Project configuration
-└── packages.yml       # DBT packages
 ```
 
 ### 4. Data Models
@@ -407,37 +420,6 @@ dbt snapshot
 dbt run --full-refresh
 ```
 
-## 📂 Project Structure
-
-```
-.
-├── analyses/
-│   └── movie_analysis.sql
-├── macros/
-│   └── custom_macros.sql
-├── models/
-│   ├── staging/
-│   │   ├── src_movies.sql
-│   │   ├── src_ratings.sql
-│   │   └── ...
-│   ├── dimensions/
-│   │   ├── dim_movies.sql
-│   │   ├── dim_users.sql
-│   │   └── dim_genome_tags.sql
-│   └── facts/
-│       ├── fct_ratings.sql
-│       └── fct_genome_scores.sql
-├── seeds/
-│   └── seed_movie_release_dates.csv
-├── snapshots/
-│   └── snap_tags.sql
-├── tests/
-│   └── relevance_score_test.sql
-├── dbt_project.yml
-├── packages.yml
-└── README.md
-```
-
 ## 🎓 Learning Outcomes
 
 - **ELT Paradigm**: Transform after load strategy
@@ -461,24 +443,15 @@ Complete setup with raw tables, views, and snapshot tables organized by schema.
 ### VS Code Project Structure
 Organized DBT project with all components clearly separated.
 
-## 🚀 Future Enhancements
-
-- [ ] Add more advanced analytics models
-- [ ] Implement data monitoring and alerts
-- [ ] Add CI/CD pipeline integration
-- [ ] Expand test coverage
-- [ ] Add performance optimization
-- [ ] Implement data mart layers
-
 ## 📝 License
 
 This project is open source and available under the [MIT License](LICENSE).
 
 ## 👤 Author
 
-**Shivsharan Patil**
-- GitHub: [@ShivsharanPatil](!https://github.com/shivshaa)
-- LinkedIn: [Shivsharan_Patil]([!https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/shivsharan-patil-6435a1181/))
+**Shivsharan Patil**  
+- GitHub: [@shivshaa](https://github.com/shivshaa)  
+- LinkedIn: [Shivsharan Patil](https://www.linkedin.com/in/shivsharan-patil-6435a1181/)  
 
 ## 🙏 Acknowledgments
 
