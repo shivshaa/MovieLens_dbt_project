@@ -6,6 +6,11 @@
 [![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)](https://www.snowflake.com/)
 [![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
 
+### Data Flow
+
+```
+Raw Data → S3 Bucket → Snowflake (RAW Schema) → Staging Layer → Development Zone
+```
 
 ## 🏗️ Architecture
  
@@ -47,12 +52,6 @@
 - **Data Warehouse**: Snowflake
 - **Transformation**: DBT (Data Build Tool)
 - **Language**: SQL
-
-### Data Flow
-
-```
-Raw Data → S3 Bucket → Snowflake (RAW Schema) → Staging Layer → Development Zone
-```
 
 ## 📊 Dataset
 
