@@ -427,6 +427,7 @@ dbt run --full-refresh
 Interactive documentation with model metadata, column descriptions, and test results.
 
 ### Lineage Graph
+![Lineage graph]('Lineage graph.png')
 Visual representation of data flow from source tables through staging to final models.
 
 ### Snowflake Dashboard
