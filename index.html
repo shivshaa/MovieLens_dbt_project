@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Data Analysis Pipeline - DBT & Snowflake</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF694B;
+            --secondary: #29B5E8;
+            --accent: #569A31;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --text: #333;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 40px rgba(0,0,0,0.2);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--dark) 0%, #2d3748 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/></svg>');
+            opacity: 0.3;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            background: white;
+            color: var(--dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge.dbt { background: var(--primary); color: white; }
+        .badge.snowflake { background: var(--secondary); color: white; }
+        .badge.aws { background: var(--accent); color: white; }
+
+        nav {
+            background: var(--light);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            color: var(--dark);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+            display: inline-block;
+        }
+
+        h3 {
+            color: var(--dark);
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .architecture {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .data-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .flow-item {
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .flow-item.grey {
+            background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+        }
+
+        .flow-item.green {
+            background: linear-gradient(135deg, #51cf66 0%, #69db7c 100%);
+        }
+
+        .flow-item.blue {
+            background: linear-gradient(135deg, #339af0 0%, #4dabf7 100%);
+        }
+
+        .flow-item.orange {
+            background: linear-gradient(135deg, #ff922b 0%, #ffa94d 100%);
+        }
+
+        .flow-item:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: #495057;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        pre code {
+            background: none;
+            color: #fff;
+            padding: 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--light) 0%, #fff 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric {
+            background: linear-gradient(135deg, var(--secondary) 0%, #5ac8fa 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .command-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .command-box::before {
+            content: '$ ';
+            color: #00ff00;
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .tech-item {
+            background: var(--dark);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .author-section {
+            background: linear-gradient(135deg, var(--dark) 0%, #2d3748 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .author-section h3 {
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .author-info a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .author-info a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .back-to-top:hover {
+            background: #ff8a75;
+            transform: translateY(-5px);
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .flow-item:not(:last-child)::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -1.5rem;
+                transform: translateX(50%);
+            }
+
+            .data-flow {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #ffd700 0%, #ffed4e 100%);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Netflix Data Analysis Pipeline</h1>
+            <p>End-to-End ELT with DBT, Snowflake & AWS S3</p>
+            <div class="badges">
+                <span class="badge dbt">DBT</span>
+                <span class="badge snowflake">Snowflake</span>
+                <span class="badge aws">AWS S3</span>
+            </div>
+			<span></span>
+				<p>📝 Technical Documentation </br>
+                <strong>Author:</strong> Shivsharan Patil</p>
+
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#dataset">Dataset</a></li>
+                <li><a href="#implementation">Implementation</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#metrics">Metrics</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <section id="overview">
+                <h2>📋 Project Overview</h2>
+                <p>A comprehensive data analytics pipeline simulating Netflix data analysis using modern data engineering tools. This project demonstrates the <span class="highlight">ELT (Extract, Load, Transform)</span> paradigm, leveraging AWS S3 for storage, Snowflake as the data warehouse, and DBT for transformation logic.</p>
+                
+                <div class="tech-stack">
+                    <div class="tech-item">Storage: AWS S3</div>
+                    <div class="tech-item">Warehouse: Snowflake</div>
+                    <div class="tech-item">Transform: DBT</div>
+                    <div class="tech-item">Language: SQL</div>
+                </div>
+            </section>
+
+            <section id="architecture">
+                <h2>🏗️ Architecture</h2>
+                <div class="data-flow">
+                    <div class="flow-item grey">Raw Data<br>(CSV Files)</div>
+                    <div class="flow-item green">AWS S3<br>(Storage)</div>
+                    <div class="flow-item blue">Snowflake<br>(RAW Layer)</div>
+                    <div class="flow-item orange">DBT Models<br>(Transformed)</div>
+                </div>
+
+                <div class="card">
+                    <h3>Data Flow Pipeline</h3>
+                    <p><strong>Extract</strong> → Load raw MovieLens data into AWS S3</p>
+                    <p><strong>Load</strong> → Transfer data from S3 to Snowflake RAW schema</p>
+                    <p><strong>Transform</strong> → Use DBT to create staging, dimension, and fact tables</p>
+                    <p><strong>Test</strong> → Validate data quality with automated tests</p>
+                    <p><strong>Document</strong> → Auto-generate interactive documentation</p>
+                </div>
+
+                <h3>Snowflake Schema Structure</h3>
+                <div class="architecture">MOVIELENS (Database)
+├── RAW (Landing Zone)
+│   ├── RAW_MOVIES
+│   ├── RAW_RATINGS
+│   ├── RAW_TAGS
+│   ├── RAW_LINKS
+│   ├── RAW_GENOME_TAGS
+│   └── RAW_GENOME_SCORES
+│
+├── DEV (Transformed Models)
+│   ├── Staging (src_*)
+│   ├── Dimensions (dim_*)
+│   └── Facts (fct_*)
+│
+└── SNAPSHOTS (Historical Tracking)
+    └── SNAP_TAGS (SCD Type 2)</div>
+            </section>
+
+				<section id="dataset">
+					<h2>📊 Dataset</h2>
+					<p>
+						<strong>MovieLens 20M Dataset</strong> simulating Netflix analytics.  
+						The dataset is publicly available and can be downloaded from  
+						<a href="https://grouplens.org/datasets/movielens/" target="_blank">
+							GroupLens MovieLens Datasets
+						</a>.
+					</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Records</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ratings</td>
+                            <td>20M</td>
+                            <td>User ratings with timestamps</td>
+                        </tr>
+                        <tr>
+                            <td>Tags</td>
+                            <td>465K</td>
+                            <td>User-generated movie tags</td>
+                        </tr>
+                        <tr>
+                            <td>Movies</td>
+                            <td>20K</td>
+                            <td>Movie metadata with genres</td>
+                        </tr>
+                        <tr>
+                            <td>Users</td>
+                            <td>138K</td>
+                            <td>Unique user identifiers</td>
+                        </tr>
+                        <tr>
+                            <td>Genome Tags/Scores</td>
+                            <td>1.1M+</td>
+                            <td>Tag relevance metrics</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="implementation">
+                <h2>🚀 Implementation Steps</h2>
+
+                <div class="card">
+                    <h3>1. Data Extraction & AWS S3 Setup</h3>
+                    <p>Created S3 bucket and uploaded all MovieLens CSV files with proper access controls.</p>
+                    <div class="command-box">aws s3 cp movielens/ s3://my-netflix-bucket/ --recursive</div>
+                </div>
+
+                <div class="card">
+                    <h3>2. Snowflake Configuration</h3>
+                    <p>Configured Snowflake with role-based access control and created database schemas.</p>
+                    <pre><code>-- Create roles and users
+CREATE ROLE TRANSFORM;
+CREATE USER dbt PASSWORD='***';
+GRANT ROLE TRANSFORM TO USER dbt;
+
+-- Create database structure
+CREATE DATABASE MOVIELENS;
+CREATE SCHEMA MOVIELENS.RAW;
+CREATE SCHEMA MOVIELENS.DEV;
+
+-- Load data from S3
+COPY INTO RAW.RAW_MOVIES
+FROM @s3_stage/movies.csv
+FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1);</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>3. DBT Environment Setup</h3>
+                    <div class="command-box">pip install dbt-snowflake</div>
+                    <div class="command-box">dbt init my_dbt_project</div>
+                    <p>Project structure organized with models, tests, snapshots, seeds, and macros.</p>
+                </div>
+
+                <div class="card">
+                    <h3>4. Data Modeling</h3>
+                    <h4>Staging Layer (Views)</h4>
+                    <pre><code>-- src_movies.sql
+SELECT
+    movieId AS movie_id,
+    title,
+    genres
+FROM {{ source('raw', 'raw_movies') }}</code></pre>
+
+                    <h4>Dimension Tables (Tables)</h4>
+                    <pre><code>-- dim_movies.sql
+{{
+    config(
+        materialized='table'
+    )
+}}
+
+SELECT
+    movie_id,
+    title,
+    SPLIT(genres, '|') AS genre_array
+FROM {{ ref('src_movies') }}</code></pre>
+
+                    <h4>Fact Tables (Incremental)</h4>
+                    <pre><code>-- fct_ratings.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='rating_id'
+    )
+}}
+
+SELECT *
+FROM {{ ref('src_ratings') }}
+{% if is_incremental() %}
+WHERE rated_at > (SELECT MAX(rated_at) FROM {{ this }})
+{% endif %}</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>5. Snapshots (SCD Type 2)</h3>
+                    <p>Implemented slowly changing dimensions to track historical changes over time.</p>
+                    <pre><code>{% snapshot snap_tags %}
+{{
+    config(
+        target_schema='snapshots',
+        unique_key='tag_id',
+        strategy='timestamp',
+        updated_at='updated_at'
+    )
+}}
+SELECT * FROM {{ ref('src_tags') }}
+{% endsnapshot %}</code></pre>
+                    <div class="command-box">dbt snapshot</div>
+                </div>
+
+                <div class="card">
+                    <h3>6. Data Quality Testing</h3>
+                    <p>Comprehensive test coverage ensuring data integrity.</p>
+                    <pre><code>models:
+  - name: dim_movies
+    columns:
+      - name: movie_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_users')
+              field: user_id</code></pre>
+                    <div class="command-box">dbt test</div>
+                </div>
+
+                <div class="card">
+                    <h3>7. Documentation Generation</h3>
+                    <p>Auto-generated interactive documentation with lineage graphs.</p>
+                    <div class="command-box">dbt docs generate</div>
+                    <div class="command-box">dbt docs serve</div>
+                    <p>Access documentation at <code>http://localhost:8080</code></p>
+                </div>
+            </section>
+
+            <section id="features">
+                <h2>🎯 Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>✅ Modular Design</h4>
+                        <p>Clear separation between staging, dimension, and fact layers with reusable models.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Incremental Processing</h4>
+                        <p>Efficient updates for large fact tables using timestamp-based logic.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Historical Tracking</h4>
+                        <p>SCD Type 2 implementation maintaining complete data history.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Data Quality</h4>
+                        <p>Comprehensive test coverage with automated quality checks.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Documentation</h4>
+                        <p>Auto-generated interactive docs with visual lineage graphs.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ Security</h4>
+                        <p>Role-based access control following least privilege principles.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="usage">
+                <h2>🔧 Usage Commands</h2>
+                <div class="card">
+                    <h4>Run All Models</h4>
+                    <div class="command-box">dbt run</div>
+                </div>
+                <div class="card">
+                    <h4>Run Specific Model</h4>
+                    <div class="command-box">dbt run --select dim_movies</div>
+                </div>
+                <div class="card">
+                    <h4>Run Tests</h4>
+                    <div class="command-box">dbt test</div>
+                </div>
+                <div class="card">
+                    <h4>Generate Documentation</h4>
+                    <div class="command-box">dbt docs generate && dbt docs serve</div>
+                </div>
+                <div class="card">
+                    <h4>Run Snapshots</h4>
+                    <div class="command-box">dbt snapshot</div>
+                </div>
+                <div class="card">
+                    <h4>Full Refresh</h4>
+                    <div class="command-box">dbt run --full-refresh</div>
+                </div>
+            </section>
+
+            <section id="metrics">
+                <h2>📈 Project Metrics</h2>
+                <div class="metric-grid">
+                    <div class="metric">
+                        <div class="metric-value">20M+</div>
+                        <div class="metric-label">Records Processed</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">15+</div>
+                        <div class="metric-label">Models Created</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">13+</div>
+                        <div class="metric-label">Tests Implemented</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">100%</div>
+                        <div class="metric-label">Test Coverage</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎓 Learning Outcomes</h2>
+                <ul>
+                    <li><strong>ELT Paradigm:</strong> Transform after load strategy for modern data warehouses</li>
+                    <li><strong>Dimensional Modeling:</strong> Star schema implementation with fact and dimension tables</li>
+                    <li><strong>AWS S3 & Snowflake Integration:</strong> Seamless data loading from cloud storage to warehouse using external stages, understanding IAM roles, and configuring secure access credentials for automated data ingestion</li>
+                    <li><strong>COPY INTO Command:</strong> Mastered bulk data loading techniques, file format specifications, error handling, data validation during ingestion, and optimizing load performance for large datasets</li>
+                    <li><strong>Snowflake Advanced Queries:</strong> Leveraging Snowflake's unique features including zero-copy cloning, time-travel queries, result caching, and query optimization for analytical workloads</li>
+                    <li><strong>DBT Macros:</strong> Creating reusable SQL functions and jinja templating for dynamic query generation, reducing code redundancy, and implementing custom business logic across multiple models</li>
+                    <li><strong>DBT Tests:</strong> Implementing schema tests (unique, not_null, relationships, accepted_values), custom data tests, and singular tests to ensure data quality and integrity throughout the pipeline</li>
+                    <li><strong>DBT Snapshots:</strong> Building Type 2 Slowly Changing Dimensions (SCD) to track historical changes, understanding timestamp and check strategies, and maintaining audit trails for regulatory compliance</li>
+                    <li><strong>DBT Seeds:</strong> Managing static reference data and lookup tables within the DBT project, version controlling CSV files, and efficiently loading small datasets for dimensional enrichment</li>
+                    <li><strong>Version Control:</strong> SQL-based transformation logic in Git with proper branching strategies and code review processes</li>
+                    <li><strong>Data Lineage:</strong> Automatic dependency management with DBT's ref() function, visualizing data flow through DAG graphs, and impact analysis for upstream changes</li>
+                    <li><strong>Testing:</strong> Data quality assurance best practices including unit tests, integration tests, and continuous validation</li>
+                    <li><strong>Documentation:</strong> Self-documenting data pipelines with auto-generated docs, column-level descriptions, and interactive lineage visualization</li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="author-section">
+            <h3>📝 Technical Documentation</h3>
+            <div class="author-info">
+                <p><strong>Author:</strong> Shivsharan Patil</p>
+                <p><strong>GitHub:</strong> <a href="https://github.com/shivshaa/ETL_finance_data_airflow" target="_blank">https://github.com/shivshaa/MovieLens_dbt_project</a></p>
+                <p><strong>Email:</strong> <a href="mailto:shivsharanpatil404@gmail.com">shivsharanpatil404@gmail.com</a></p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Shivsharan Patil | Netflix Data Analysis Pipeline</p>
+            <p>Built with DBT, Snowflake & AWS S3</p>
+        </footer>
+    </div>
+
+    <div class="back-to-top" onclick="scrollToTop()">↑</div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Back to top button
+        const backToTop = document.querySelector('.back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card, .feature-card, .metric').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
