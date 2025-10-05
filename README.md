@@ -432,7 +432,7 @@ Interactive documentation with model metadata, column descriptions, and test res
 Visual representation of data flow from source tables through staging to final models.
 
 ### Snowflake Dashboard
-![Lineage graph](Lineage%20graph.png)
+![snowflake dashboard](Snowflake%20project%20structure.png)
 Complete setup with raw tables, views, and snapshot tables organized by schema.
 
 ### VS Code - dbt Project Structure
