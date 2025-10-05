@@ -428,15 +428,15 @@ dbt run --full-refresh
 Interactive documentation with model metadata, column descriptions, and test results.
 
 ### Lineage Graph
-![Lineage graph]('Lineage%20graph.png')
+![Lineage graph](Lineage%20graph.png)
 Visual representation of data flow from source tables through staging to final models.
 
 ### Snowflake Dashboard
-![Lineage graph]('Lineage%20graph.png')
+![Lineage graph](Lineage%20graph.png)
 Complete setup with raw tables, views, and snapshot tables organized by schema.
 
 ### VS Code - dbt Project Structure
-![vscode]('dbt%20project%20directories.png')
+![vscode](dbt%20project%20directories.png)
 Organized DBT project with all components clearly separated.
 
 ## 📝 License
